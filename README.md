@@ -1,6 +1,6 @@
 # CERP People Lifecycle Portal
 
-**CERP Innovation Challenge 2025 — Submission**
+**CERP Innovation Challenge 2026 Submission**
 
 A unified administrative platform for managing the complete research personnel lifecycle at KAUST's Clean Energy Research Platform (CERP).
 

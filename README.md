@@ -13,7 +13,7 @@ A unified administrative platform for managing the complete research personnel l
 | **Live Portal** | https://lmrendonv.github.io/cerp-people-lifecycle-portal/ |
 | **Showcase Page** | https://lmrendonv.github.io/cerp-people-lifecycle-portal/showcase.html |
 | **Architecture Diagram** | https://lmrendonv.github.io/cerp-people-lifecycle-portal/architecture.html |
-| **Full Documentation (PDF)** | [CERP_Solution.pdf](./CERP_Solution.pdf) |
+| **Full Documentation (PDF)** | [CERP_Solution.pdf](https://github.com/lmrendonv/cerp-people-lifecycle-portal/raw/main/CERP_Solution.pdf) |
 
 ---
 

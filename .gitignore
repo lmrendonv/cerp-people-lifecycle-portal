@@ -1,0 +1,66 @@
+# Dev tooling
+.agents/
+.playwright-mcp/
+.superpowers/
+everything-claude-code/
+skills-lock.json
+
+# Source data (embedded in index.html already)
+data/
+
+# Raw source documents
+*.xlsx
+*.pdf
+!CERP_Solution.pdf
+
+# Dev folders
+brand_assets/
+screenshots/
+
+# Draft/iteration screenshots (root level)
+dash-1280-v3.png
+dash-640-v4.png
+dashboard-1280-final.png
+dashboard-1280-v2.png
+dashboard-640-final.png
+dashboard-640-fixed.png
+dashboard-640-v2.png
+dashboard-640-v3.png
+dashboard-after-enter.png
+dashboard-fixed.png
+dashboard-narrow.png
+dashboard-overflow-fix.png
+dashboard-v3.png
+
+# CERP challenge screenshots (included in PDF submission only)
+CERP Challenge 1 Dashboard.png
+CERP Challenge 2 Real life indicators.jpg
+CERP challenge 3 admin guide.jpg
+CERP challenge 4, current members.png
+CERP challenge 5, findable members.jpg
+CERP challenge 6 onboarding.jpg
+CERP challenge 7 new onboarding.jpg
+CERP challenge 8 offboarding.jpg
+CERP challenge 9 new oofboarding.jpg
+CERP challenge 10, alumni database (292 records).jpg
+CERP challenge 11, People and directory PI.png
+CERP challenge 12 People and directory platform admin .jpg
+CERP Challenge 13, People and directory research staff.jpg
+CERP challenge 14 people and directory all members.png
+cerp-01-dashboard.png
+cerp-02-indicators.jpg
+cerp-03-admin-guide.jpg
+cerp-04-current-members.png
+cerp-05-findable-members.jpg
+cerp-06-onboarding.jpg
+cerp-07-new-onboarding.jpg
+cerp-08-offboarding.jpg
+cerp-09-new-offboarding.jpg
+cerp-10-alumni.jpg
+cerp-11-people-pi.png
+cerp-12-people-admin.jpg
+cerp-13-people-staff.jpg
+cerp-14-people-members.png
+
+# OS
+.DS_Store

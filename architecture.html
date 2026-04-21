@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CERP Portal — System Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060D1A;
+    --surface: #0D1828;
+    --border: #1A2840;
+    --border-bright: #2A3E5C;
+    --indigo: #4F54C8;
+    --indigo-dim: rgba(79,84,200,0.2);
+    --teal: #1A9B8C;
+    --teal-dim: rgba(26,155,140,0.2);
+    --gold: #C8973A;
+    --gold-dim: rgba(200,151,58,0.18);
+    --red: #E05252;
+    --red-dim: rgba(224,82,82,0.15);
+    --green: #1F9B6E;
+    --green-dim: rgba(31,155,110,0.2);
+    --purple: #8B5CF6;
+    --purple-dim: rgba(139,92,246,0.18);
+    --white: #EDF2FA;
+    --white-dim: #8FA3BE;
+    --white-muted: #4A607A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 60px 40px 80px;
+  }
+  header { text-align: center; margin-bottom: 64px; }
+  header .eyebrow {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--indigo);
+    margin-bottom: 14px;
+  }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  header h1 em { font-style: italic; color: var(--teal); font-weight: 300; }
+  header p { color: var(--white-dim); font-size: 0.9rem; max-width: 500px; margin: 0 auto; }
+
+  /* ── Main diagram ── */
+  .diagram {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  /* Layer label */
+  .layer-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 32px;
+    align-items: stretch;
+    margin-bottom: 0;
+    position: relative;
+  }
+  .layer-label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 0 20px 0 0;
+    border-right: 2px solid var(--border-bright);
+    min-height: 120px;
+  }
+  .layer-name {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+    text-align: right;
+  }
+  .layer-num {
+    font-family: 'Fraunces', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: right;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .layer-nodes {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 28px 0;
+    flex-wrap: wrap;
+  }
+
+  /* Arrow between layers */
+  .layer-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 0;
+    color: var(--white-muted);
+    font-size: 1.3rem;
+    position: relative;
+  }
+  .layer-arrow::before {
+    content: '';
+    position: absolute;
+    left: 140px;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border-bright), transparent);
+    opacity: 0.4;
+  }
+  .arrow-icon {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    margin-left: 172px;
+    position: relative;
+    z-index: 1;
+    color: var(--white-dim);
+  }
+
+  /* Node */
+  .node {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 140px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+    position: relative;
+  }
+  .node:hover { transform: translateY(-2px); }
+  .node-icon {
+    width: 32px; height: 32px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .node-icon svg { width: 16px; height: 16px; }
+  .node-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.3;
+  }
+  .node-sub {
+    font-size: 0.68rem;
+    color: var(--white-muted);
+    line-height: 1.4;
+    font-family: 'DM Mono', monospace;
+  }
+  .node-badge {
+    position: absolute;
+    top: -8px; right: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    border-radius: 100px;
+    padding: 1px 8px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+
+  /* Node colors */
+  .c-indigo { border-color: rgba(79,84,200,0.35); }
+  .c-indigo:hover { border-color: var(--indigo); }
+  .c-indigo .node-icon { background: var(--indigo-dim); color: var(--indigo); }
+  .c-indigo .node-badge { color: var(--indigo); border-color: rgba(79,84,200,0.4); }
+
+  .c-teal { border-color: rgba(26,155,140,0.35); }
+  .c-teal:hover { border-color: var(--teal); }
+  .c-teal .node-icon { background: var(--teal-dim); color: var(--teal); }
+  .c-teal .node-badge { color: var(--teal); border-color: rgba(26,155,140,0.4); }
+
+  .c-gold { border-color: rgba(200,151,58,0.35); }
+  .c-gold:hover { border-color: var(--gold); }
+  .c-gold .node-icon { background: var(--gold-dim); color: var(--gold); }
+  .c-gold .node-badge { color: var(--gold); border-color: rgba(200,151,58,0.4); }
+
+  .c-green { border-color: rgba(31,155,110,0.35); }
+  .c-green:hover { border-color: var(--green); }
+  .c-green .node-icon { background: var(--green-dim); color: var(--green); }
+  .c-green .node-badge { color: var(--green); border-color: rgba(31,155,110,0.4); }
+
+  .c-red { border-color: rgba(224,82,82,0.3); }
+  .c-red:hover { border-color: var(--red); }
+  .c-red .node-icon { background: var(--red-dim); color: var(--red); }
+  .c-red .node-badge { color: var(--red); border-color: rgba(224,82,82,0.35); }
+
+  .c-purple { border-color: rgba(139,92,246,0.3); }
+  .c-purple:hover { border-color: var(--purple); }
+  .c-purple .node-icon { background: var(--purple-dim); color: var(--purple); }
+  .c-purple .node-badge { color: var(--purple); border-color: rgba(139,92,246,0.35); }
+
+  /* Layer 1 — data */
+  .l1 .layer-num { color: var(--teal); }
+  /* Layer 2 — engine */
+  .l2 .layer-num { color: var(--indigo); }
+  /* Layer 3 — modules */
+  .l3 .layer-num { color: var(--gold); }
+  /* Layer 4 — outputs */
+  .l4 .layer-num { color: var(--green); }
+
+  /* Connector between node groups */
+  .node-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mini-arrow { color: var(--white-muted); font-size: 0.9rem; flex-shrink: 0; }
+
+  /* ── Legend ── */
+  .legend {
+    max-width: 1100px;
+    margin: 48px auto 0;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--white-dim);
+  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── Back link ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--white-dim);
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 40px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--white); }
+
+  /* ── Fade in ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeIn 0.5s ease forwards;
+  }
+  @keyframes fadeIn { to { opacity:1; transform:translateY(0); } }
+  .d1 { animation-delay: 0.1s; }
+  .d2 { animation-delay: 0.2s; }
+  .d3 { animation-delay: 0.35s; }
+  .d4 { animation-delay: 0.5s; }
+  .d5 { animation-delay: 0.65s; }
+  .d6 { animation-delay: 0.8s; }
+  .d7 { animation-delay: 0.95s; }
+
+  /* ── Summary table ── */
+  .summary {
+    max-width: 1100px;
+    margin: 60px auto 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .summary-header {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--white-muted);
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    divide-x: 1px solid var(--border);
+  }
+  .summary-cell {
+    padding: 20px 28px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .summary-cell:nth-child(3n) { border-right: none; }
+  .summary-cell-label { font-size: 0.7rem; color: var(--white-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .summary-cell-val { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--white); }
+  .summary-cell-val span { color: var(--white-muted); }
+</style>
+</head>
+<body>
+
+<a href="showcase.html" class="back-link fade-in d1">← Back to showcase</a>
+
+<header class="fade-in d1">
+  <div class="eyebrow">System Architecture</div>
+  <h1>CERP People Lifecycle Portal<br><em>Technical Design</em></h1>
+  <p>How data, logic, and interface layers fit together in a zero-dependency, single-file architecture.</p>
+</header>
+
+<div class="diagram">
+
+  <!-- Layer 1: Data Sources -->
+  <div class="layer-row l1 fade-in d2">
+    <div class="layer-label">
+      <div class="layer-num">01</div>
+      <div class="layer-name">Data<br>Sources</div>
+    </div>
+    <div class="layer-nodes">
+      <div class="node c-teal">
+        <div class="node-badge">533 records</div>
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div class="node-title">CERP Member Data</div>
+        <div class="node-sub">241 active · 292 alumni<br>real KAUST records</div>
+      </div>
+      <div class="node c-indigo">
+        <div class="node-badge">11 PIs</div>
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </div>
+        <div class="node-title">Faculty Profiles</div>
+        <div class="node-sub">name · research area<br>LinkedIn · avatar</div>
+      </div>
+      <div class="node c-gold">
+        <div class="node-badge">seed data</div>
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <div class="node-title">Onboarding Cases</div>
+        <div class="node-sub">let onboardingData[]<br>in-memory, mutable</div>
+      </div>
+      <div class="node c-red">
+        <div class="node-badge">seed data</div>
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </div>
+        <div class="node-title">Offboarding Cases</div>
+        <div class="node-sub">let offboardingData[]<br>in-memory, mutable</div>
+      </div>
+      <div class="node c-purple">
+        <div class="node-badge">templates</div>
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 10h16M4 14h8m-8 4h4"/></svg>
+        </div>
+        <div class="node-title">Checklist Templates</div>
+        <div class="node-sub">18 onboarding tasks<br>17 exit tasks · categorized</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layer-arrow fade-in d3"><div class="arrow-icon">↓</div></div>
+
+  <!-- Layer 2: Application Core -->
+  <div class="layer-row l2 fade-in d3">
+    <div class="layer-label">
+      <div class="layer-num">02</div>
+      <div class="layer-name">Application<br>Core</div>
+    </div>
+    <div class="layer-nodes">
+      <div class="node c-indigo">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div class="node-title">Lifecycle State Machine</div>
+        <div class="node-sub">New → Onboarding →<br>Active → Exit → Alumni</div>
+      </div>
+      <div class="mini-arrow">→</div>
+      <div class="node c-teal">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+        <div class="node-title">Progress Engine</div>
+        <div class="node-sub">% done · overdue detect<br>status auto-update</div>
+      </div>
+      <div class="mini-arrow">→</div>
+      <div class="node c-gold">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <div class="node-title">Exit Summary Builder</div>
+        <div class="node-sub">category → summary row<br>auto-derived, no manual input</div>
+      </div>
+      <div class="mini-arrow">→</div>
+      <div class="node c-indigo">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </div>
+        <div class="node-title">Render Engine</div>
+        <div class="node-sub">renderDashboard()<br>renderOnboarding() etc.</div>
+      </div>
+      <div class="mini-arrow">→</div>
+      <div class="node c-purple">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </div>
+        <div class="node-title">Alert System</div>
+        <div class="node-sub">overdue flags<br>attention required count</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layer-arrow fade-in d4"><div class="arrow-icon">↓</div></div>
+
+  <!-- Layer 3: Portal Modules -->
+  <div class="layer-row l3 fade-in d4">
+    <div class="layer-label">
+      <div class="layer-num">03</div>
+      <div class="layer-name">Portal<br>Modules</div>
+    </div>
+    <div class="layer-nodes">
+      <div class="node c-indigo">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        </div>
+        <div class="node-title">Dashboard</div>
+        <div class="node-sub">stats · lifecycle flow<br>tables · alerts</div>
+      </div>
+      <div class="node c-teal">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+        </div>
+        <div class="node-title">Onboarding</div>
+        <div class="node-sub">tracker · checklist modal<br>new joinee form</div>
+      </div>
+      <div class="node c-gold">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 16l4-4m0 0l-4-4m4 4H7"/></svg>
+        </div>
+        <div class="node-title">Offboarding</div>
+        <div class="node-sub">exit checklist panel<br>exit summary card</div>
+      </div>
+      <div class="node c-green">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+        </div>
+        <div class="node-title">Current Members</div>
+        <div class="node-sub">241 members · search<br>filter by PI/role</div>
+      </div>
+      <div class="node c-red">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+        </div>
+        <div class="node-title">Alumni Database</div>
+        <div class="node-sub">292 records · 2018–now<br>searchable history</div>
+      </div>
+      <div class="node c-purple">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </div>
+        <div class="node-title">People &amp; Directory</div>
+        <div class="node-sub">faculty · admin · staff<br>LinkedIn + research area</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layer-arrow fade-in d5"><div class="arrow-icon">↓</div></div>
+
+  <!-- Layer 4: Admin Outputs -->
+  <div class="layer-row l4 fade-in d5">
+    <div class="layer-label">
+      <div class="layer-num">04</div>
+      <div class="layer-name">Admin<br>Outputs</div>
+    </div>
+    <div class="layer-nodes">
+      <div class="node c-green">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <div class="node-title">Live Dashboard View</div>
+        <div class="node-sub">what needs action today</div>
+      </div>
+      <div class="node c-teal">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2m-3 7l2 2 4-4"/></svg>
+        </div>
+        <div class="node-title">Checklist Progress</div>
+        <div class="node-sub">per-person task tracking</div>
+      </div>
+      <div class="node c-gold">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <div class="node-title">Exit Summary Report</div>
+        <div class="node-sub">auto-generated clearance doc</div>
+      </div>
+      <div class="node c-indigo">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </div>
+        <div class="node-title">Overdue Alerts</div>
+        <div class="node-sub">flagged to dashboard</div>
+      </div>
+      <div class="node c-purple">
+        <div class="node-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </div>
+        <div class="node-title">Alumni Record</div>
+        <div class="node-sub">permanent institutional memory</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Summary table -->
+<div class="summary fade-in d6">
+  <div class="summary-header">System Summary</div>
+  <div class="summary-grid">
+    <div class="summary-cell">
+      <div class="summary-cell-label">Deployment</div>
+      <div class="summary-cell-val">Single HTML file <span>/ no build step</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">Dependencies</div>
+      <div class="summary-cell-val">Tailwind CSS <span>/ CDN only</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">Framework</div>
+      <div class="summary-cell-val">Vanilla JS <span>/ no React/Vue</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">Active Members</div>
+      <div class="summary-cell-val">241 <span>/ real CERP data</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">Alumni Records</div>
+      <div class="summary-cell-val">292 <span>/ 2018–2025</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">Total People</div>
+      <div class="summary-cell-val">533 <span>/ verified records</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">State Model</div>
+      <div class="summary-cell-val">In-memory JS <span>/ session-persistent</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">Checklist Tasks</div>
+      <div class="summary-cell-val">18 onboarding <span>/ 17 exit tasks</span></div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-cell-label">Server</div>
+      <div class="summary-cell-val">python3 -m http.server <span>/ any static host</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Legend -->
+<div class="legend fade-in d7">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Data / People</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--indigo)"></div>Processing / UI</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Lifecycle Operations</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Outputs / Actions</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Exit / Alumni</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Templates / Alerts</div>
+</div>
+
+</body>
+</html>

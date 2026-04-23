@@ -4475,18 +4475,17 @@ function initCharts() {
   var years = Object.keys(yearCounts).sort();
   var yearMax = Math.max.apply(null, years.map(function(y){ return yearCounts[y]; })) || 1;
   var latestYear = years[years.length - 1];
-  var alumniHtml = '<div style="display:flex;align-items:flex-end;gap:5px;height:120px;margin-bottom:10px;">'
+  var BAR_MAX_PX = 100;
+  var alumniHtml = '<div style="display:flex;align-items:flex-end;gap:4px;height:' + (BAR_MAX_PX + 20) + 'px;padding-top:20px;">'
     + years.map(function(y) {
-        var pct = Math.round(yearCounts[y] / yearMax * 100);
+        var barH = Math.max(Math.round(yearCounts[y] / yearMax * BAR_MAX_PX), 4);
         var isLatest = y === latestYear;
-        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">'
-          + '<div style="font-size:0.62rem;color:#6B7280;">' + yearCounts[y] + '</div>'
-          + '<div style="width:100%;background:' + (isLatest ? '#3B3FA8' : '#C7D2FE') + ';border-radius:3px 3px 0 0;height:' + pct + '%;min-height:3px;"></div>'
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:100%;">'
+          + '<div style="font-size:0.6rem;color:#6B7280;line-height:1;">' + yearCounts[y] + '</div>'
+          + '<div style="width:100%;background:' + (isLatest ? '#3B3FA8' : '#C7D2FE') + ';border-radius:3px 3px 0 0;height:' + barH + 'px;"></div>'
+          + '<div style="font-size:0.6rem;color:#9CA3AF;white-space:nowrap;">' + y.slice(2) + '</div>'
           + '</div>';
       }).join('')
-    + '</div>'
-    + '<div style="display:flex;gap:5px;">'
-    + years.map(function(y){ return '<div style="flex:1;text-align:center;font-size:0.6rem;color:#9CA3AF;">' + y.slice(2) + '</div>'; }).join('')
     + '</div>';
 
   // ── Chart 3: Top PI Groups ────────────────────────────────

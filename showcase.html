@@ -719,7 +719,7 @@
         <div class="section-eyebrow fade-up">Portal Modules</div>
         <h2 class="section-title fade-up">Every operation<br>in one place</h2>
       </div>
-      <p class="section-subtitle fade-up" style="margin-bottom:0;">Six dedicated modules cover the full admin surface area — from a live operational dashboard to a searchable alumni database spanning 2018 to today.</p>
+      <p class="section-subtitle fade-up" style="margin-bottom:0;">Six core modules plus a full automation layer — covering the complete admin surface area from a live analytics dashboard to one-click broadcast email, CSV export, and printable packets.</p>
     </div>
     <div class="feature-cards">
 
@@ -734,8 +734,8 @@
         </div>
         <div class="feature-body">
           <span class="feature-tag tag-blue">Dashboard</span>
-          <div class="feature-title">Live operational command center</div>
-          <div class="feature-desc">Stat cards for active onboarding, pending offboarding, alumni count, and attention flags. Personnel Lifecycle Flow with live stage counts. Active onboarding table and upcoming departures — all above the fold.</div>
+          <div class="feature-title">Live operational command center with analytics</div>
+          <div class="feature-desc">Stat cards, Personnel Lifecycle Flow with live stage counts, and three interactive analytics charts: Role Distribution donut, Alumni Trend by Year bar chart, and Members by PI Group ranking. Active onboarding and upcoming departures tables below. All state persists across browser sessions via localStorage.</div>
         </div>
       </div>
 
@@ -750,8 +750,8 @@
         </div>
         <div class="feature-body">
           <span class="feature-tag tag-blue">Onboarding</span>
-          <div class="feature-title">18-task checklist with dual-track structure</div>
-          <div class="feature-desc">CERP Admin and KAUST HR task sections. Progress bars, status badges (New → In Progress → Complete), supervisor assignment, and per-task toggles.</div>
+          <div class="feature-title">18-task checklist with email actions & print</div>
+          <div class="feature-desc">CERP Admin and KAUST HR task sections with per-task toggles and progress bars. One-click Send Welcome Email and Notify Supervisor buttons pre-fill personalized drafts. Print Packet generates a clean onboarding document ready to save as PDF. All progress saved automatically.</div>
         </div>
       </div>
 
@@ -766,8 +766,8 @@
         </div>
         <div class="feature-body">
           <span class="feature-tag tag-gold">Offboarding</span>
-          <div class="feature-title">Exit checklist with dynamic summary</div>
-          <div class="feature-desc">Live clearance checklist with overdue detection. Dynamic exit summary auto-derived from task categories: Equipment, Access Revoked, Knowledge Transfer, Alumni Record, Exit Interview.</div>
+          <div class="feature-title">Exit checklist with email actions & summary</div>
+          <div class="feature-desc">Live clearance checklist with overdue detection and a dynamic exit summary auto-derived from task categories. Send Exit Notice to the departing member or Notify CEC with one click — both pre-filled with pending tasks. Print Exit Packet generates a printable clearance document instantly.</div>
         </div>
       </div>
 
@@ -783,7 +783,7 @@
         <div class="feature-body">
           <span class="feature-tag tag-green">Members</span>
           <div class="feature-title">241 verified active members</div>
-          <div class="feature-desc">Searchable, filterable table with formatted role titles, PI group attribution, department, and KAUST email. Loaded from real CERP member data.</div>
+          <div class="feature-desc">Searchable, filterable table with formatted role titles, PI group attribution, and department. Email addresses are live mailto: links — click to compose instantly. Export CSV downloads the current filtered view as a date-stamped spreadsheet.</div>
         </div>
       </div>
 
@@ -798,8 +798,8 @@
         </div>
         <div class="feature-body">
           <span class="feature-tag tag-teal">Directory</span>
-          <div class="feature-title">Faculty, admin, staff &amp; researcher profiles</div>
-          <div class="feature-desc">Four-tab directory with faculty cards (research areas, LinkedIn links, PI labels), admin staff, research staff, and a full member listing across all 11 PI groups.</div>
+          <div class="feature-title">Directory with Group Communications</div>
+          <div class="feature-desc">Four-tab directory: faculty cards, admin staff, research staff, and all members. Group Communications card lets admins broadcast to any category — PIs, Platform Staff, Research Staff, Students, or Everyone — with live recipient counts and one-click copy to clipboard.</div>
         </div>
       </div>
 
@@ -815,7 +815,7 @@
         <div class="feature-body">
           <span class="feature-tag tag-gold">Alumni</span>
           <div class="feature-title">292 alumni records since 2018</div>
-          <div class="feature-desc">Searchable alumni database with year of departure, PI group, current position, and contact information. Built from verified CERP records for the full 7-year institutional memory.</div>
+          <div class="feature-desc">Searchable, filterable alumni database with departure year, PI group, current position, and LinkedIn links. Export CSV downloads all 292 records (or the filtered subset) as a date-stamped file — institutional memory as a spreadsheet in one click.</div>
         </div>
       </div>
 
@@ -836,12 +836,13 @@
         <div class="criteria-name">Functionality</div>
         <ul class="criteria-items">
           <li>Full lifecycle management (5 stages)</li>
-          <li>Dual-track onboarding checklists</li>
-          <li>Real-time progress tracking</li>
-          <li>Overdue detection &amp; alerts</li>
-          <li>Dynamic exit summary auto-generation</li>
-          <li>241 members + 292 alumni loaded</li>
-          <li>New onboarding form with instant roster update</li>
+          <li>Dual-track onboarding &amp; offboarding checklists</li>
+          <li>One-click email templates for every stage</li>
+          <li>Group broadcast email to 5 personnel categories</li>
+          <li>CSV export for members &amp; alumni</li>
+          <li>Printable onboarding &amp; exit packets</li>
+          <li>Analytics charts: roles, alumni trend, PI groups</li>
+          <li>localStorage persistence — survives page refresh</li>
         </ul>
       </div>
       <div class="criteria-card crit-usab fade-up stagger-2">
@@ -851,9 +852,10 @@
           <li>Dashboard surfaces what needs attention first</li>
           <li>Single-page app — zero page reloads</li>
           <li>Sidebar nav with live badge counts</li>
-          <li>Click-to-open checklist details</li>
+          <li>Email actions inline with each case — no context switch</li>
           <li>Inline Admin Guide with full instructions</li>
           <li>Search on all data-heavy views</li>
+          <li>Copy-to-clipboard with confirmation feedback</li>
         </ul>
       </div>
       <div class="criteria-card crit-maint fade-up stagger-3">
@@ -863,9 +865,9 @@
           <li>Single-file deployment — no build step</li>
           <li>No external dependencies (CDN only)</li>
           <li>Data arrays easily editable by admins</li>
-          <li>Structured lifecycle state machine</li>
+          <li>localStorage versioned keys prevent stale data</li>
           <li>Checklist templates for consistent task generation</li>
-          <li>Separation of render, data, and event logic</li>
+          <li>Reset to defaults in one click for clean demos</li>
         </ul>
       </div>
       <div class="criteria-card crit-innov fade-up stagger-4">
@@ -873,11 +875,11 @@
         <div class="criteria-name">Innovation</div>
         <ul class="criteria-items">
           <li>Personnel Lifecycle Flow visual with live counts</li>
-          <li>Category-driven exit summary (no manual input)</li>
+          <li>Group Communications — broadcast to any category</li>
+          <li>Analytics charts derived live from real data</li>
           <li>Unified lifecycle view replacing 5 separate tools</li>
           <li>Real CERP member data — not synthetic demo data</li>
-          <li>Faculty LinkedIn profiles in professional directory</li>
-          <li>Built in under 72h from concept to portal</li>
+          <li>Full automation layer with zero backend required</li>
         </ul>
       </div>
     </div>
@@ -894,9 +896,11 @@
     <div class="tech-pills fade-up">
       <div class="tech-pill">vanilla JS <span>no framework</span></div>
       <div class="tech-pill">Tailwind CSS <span>via CDN</span></div>
+      <div class="tech-pill">Chart.js 4.4 <span>analytics charts</span></div>
+      <div class="tech-pill">localStorage <span>persistent state</span></div>
+      <div class="tech-pill">mailto: protocol <span>email automation</span></div>
       <div class="tech-pill">single HTML file <span>index.html</span></div>
-      <div class="tech-pill">Python HTTP server <span>or any static host</span></div>
-      <div class="tech-pill">in-memory state <span>session-persisted</span></div>
+      <div class="tech-pill">GitHub Pages <span>free static hosting</span></div>
       <div class="tech-pill">real CERP data <span>embedded JSON</span></div>
     </div>
 

@@ -795,6 +795,43 @@
           </button>
         </div>
 
+        <!-- Group Communications -->
+        <div class="card" style="padding:14px 20px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div>
+              <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;">Group Communications</div>
+              <div style="font-size:0.72rem;color:#9CA3AF;margin-top:2px;">Compose a broadcast email to any group</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button class="btn btn-secondary" style="font-size:0.75rem;padding:6px 13px;" onclick="openGroupEmail('faculty')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Email PIs
+              <span id="gc-count-faculty" style="margin-left:5px;background:#E0E7FF;color:#3B3FA8;border-radius:10px;padding:1px 7px;font-size:0.68rem;font-weight:700;"></span>
+            </button>
+            <button class="btn btn-secondary" style="font-size:0.75rem;padding:6px 13px;" onclick="openGroupEmail('admin')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Email Platform Staff
+              <span id="gc-count-admin" style="margin-left:5px;background:#E0E7FF;color:#3B3FA8;border-radius:10px;padding:1px 7px;font-size:0.68rem;font-weight:700;"></span>
+            </button>
+            <button class="btn btn-secondary" style="font-size:0.75rem;padding:6px 13px;" onclick="openGroupEmail('research')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Email Research Staff
+              <span id="gc-count-research" style="margin-left:5px;background:#E0E7FF;color:#3B3FA8;border-radius:10px;padding:1px 7px;font-size:0.68rem;font-weight:700;"></span>
+            </button>
+            <button class="btn btn-secondary" style="font-size:0.75rem;padding:6px 13px;" onclick="openGroupEmail('students')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Email Students
+              <span id="gc-count-students" style="margin-left:5px;background:#E0E7FF;color:#3B3FA8;border-radius:10px;padding:1px 7px;font-size:0.68rem;font-weight:700;"></span>
+            </button>
+            <button class="btn btn-primary" style="font-size:0.75rem;padding:6px 13px;" onclick="openGroupEmail('all')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              Email Everyone
+              <span id="gc-count-all" style="margin-left:5px;background:rgba(255,255,255,0.25);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.68rem;font-weight:700;"></span>
+            </button>
+          </div>
+        </div>
+
         <div id="people-content"></div>
 
       </div><!-- /people -->
@@ -1089,6 +1126,38 @@
     </div>
     <div id="cd-actions" style="padding:8px 22px;border-bottom:1px solid #F3F4F6;display:flex;gap:7px;flex-wrap:wrap;flex-shrink:0;background:#FAFAFA;"></div>
     <div style="overflow-y:auto;padding:18px 22px;" id="cd-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Group Email
+══════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-group-email">
+  <div class="modal-box" style="max-width:560px;">
+    <div style="padding:18px 22px 14px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <div id="ge-title" style="font-size:0.95rem;font-weight:600;color:#111827;"></div>
+        <div id="ge-meta" style="font-size:0.75rem;color:#6B7280;margin-top:2px;"></div>
+      </div>
+      <button class="btn btn-ghost" onclick="closeModal('modal-group-email')" style="padding:4px;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div style="padding:18px 22px;">
+      <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9CA3AF;margin-bottom:8px;">Email Addresses</div>
+      <textarea id="ge-emails" readonly style="width:100%;height:120px;font-size:0.75rem;font-family:monospace;color:#374151;border:1px solid #E5E7EB;border-radius:8px;padding:10px;resize:none;line-height:1.6;background:#FAFAFA;box-sizing:border-box;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" style="font-size:0.8rem;padding:7px 16px;" onclick="copyGroupEmails()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <span id="ge-copy-label">Copy All Addresses</span>
+        </button>
+        <button id="ge-mailto-btn" class="btn btn-secondary" style="font-size:0.8rem;padding:7px 16px;display:none;" onclick="openGroupMailto()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Open in Email Client
+        </button>
+      </div>
+      <div style="margin-top:10px;font-size:0.72rem;color:#9CA3AF;">Paste directly into the To: field of your email client. Outlook uses semicolons&nbsp;(;) · Gmail uses commas&nbsp;(,)</div>
+    </div>
   </div>
 </div>
 
@@ -4253,6 +4322,92 @@ function printOffboardingPacket(recordId) {
   var win = window.open('', '_blank', 'width=820,height=920');
   if (win) { win.document.write(html); win.document.close(); }
 }
+
+// ── Group Email ───────────────────────────────────────────────
+
+var _groupEmailAddresses = [];
+
+var _groupConfig = {
+  faculty:  { label: 'Affiliated Faculty (PIs)',   direct: true  },
+  admin:    { label: 'Platform Staff',             direct: true  },
+  research: { label: 'Research Staff & Postdocs',  direct: false },
+  students: { label: 'PhD & MS Students',          direct: false },
+  all:      { label: 'All Active CERP Members',    direct: false },
+};
+
+function _collectGroupEmails(group) {
+  var emails = [];
+  if (group === 'faculty') {
+    peopleData.faculty.forEach(function(p) {
+      var e = deriveKaustEmail(p.fullName); if (e) emails.push(e);
+    });
+  } else if (group === 'admin') {
+    peopleData.admin.forEach(function(p) {
+      var e = deriveKaustEmail(p.fullName); if (e) emails.push(e);
+    });
+  } else if (group === 'research') {
+    getResearchStaff().forEach(function(m) { if (m.email) emails.push(m.email); });
+  } else if (group === 'students') {
+    getActiveMembers().forEach(function(m) { if (m.email) emails.push(m.email); });
+  } else if (group === 'all') {
+    membersData.forEach(function(m) { if (m.email) emails.push(m.email); });
+    peopleData.faculty.forEach(function(p) {
+      var e = deriveKaustEmail(p.fullName); if (e) emails.push(e);
+    });
+    peopleData.admin.forEach(function(p) {
+      var e = deriveKaustEmail(p.fullName); if (e) emails.push(e);
+    });
+  }
+  return emails.filter(function(e, i, arr) { return arr.indexOf(e) === i; });
+}
+
+function _initGroupCounts() {
+  Object.keys(_groupConfig).forEach(function(g) {
+    var el = document.getElementById('gc-count-' + g);
+    if (el) el.textContent = _collectGroupEmails(g).length;
+  });
+}
+
+function openGroupEmail(group) {
+  var cfg = _groupConfig[group];
+  if (!cfg) return;
+  _groupEmailAddresses = _collectGroupEmails(group);
+  var count = _groupEmailAddresses.length;
+  document.getElementById('ge-title').textContent = 'Email: ' + cfg.label;
+  document.getElementById('ge-meta').textContent = count + ' recipient' + (count !== 1 ? 's' : '');
+  document.getElementById('ge-emails').value = _groupEmailAddresses.join(';\n');
+  document.getElementById('ge-copy-label').textContent = 'Copy All Addresses';
+  var mailtoBtn = document.getElementById('ge-mailto-btn');
+  mailtoBtn.style.display = cfg.direct ? 'inline-flex' : 'none';
+  document.getElementById('modal-group-email').classList.remove('hidden');
+}
+
+function copyGroupEmails() {
+  var ta = document.getElementById('ge-emails');
+  var text = _groupEmailAddresses.join('; ');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      var lbl = document.getElementById('ge-copy-label');
+      lbl.textContent = '✓ Copied!';
+      setTimeout(function() { lbl.textContent = 'Copy All Addresses'; }, 2000);
+    });
+  } else {
+    ta.select();
+    document.execCommand('copy');
+    var lbl = document.getElementById('ge-copy-label');
+    lbl.textContent = '✓ Copied!';
+    setTimeout(function() { lbl.textContent = 'Copy All Addresses'; }, 2000);
+  }
+}
+
+function openGroupMailto() {
+  var subject = encodeURIComponent('CERP Platform — Message from Administration');
+  var to = _groupEmailAddresses.join(',');
+  window.location.href = 'mailto:' + to + '?subject=' + subject;
+}
+
+// Initialise counts once DOM is ready
+(function() { try { _initGroupCounts(); } catch(e) {} })();
 
 </script>
 

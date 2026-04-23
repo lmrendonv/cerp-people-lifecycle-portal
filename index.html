@@ -354,6 +354,11 @@
       <!-- ══════════════════════════════ PAGE: DASHBOARD ══════════════════════════════ -->
       <div id="page-dashboard" class="page active">
 
+        <!-- Reset notice -->
+        <div style="text-align:right;margin-bottom:6px;">
+          <button onclick="resetToDefaults()" style="background:none;border:none;font-size:0.7rem;color:#D1D5DB;cursor:pointer;padding:0;" onmouseover="this.style.color='#9CA3AF'" onmouseout="this.style.color='#D1D5DB'">Reset demo data</button>
+        </div>
+
         <!-- Stat cards row -->
         <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;">
 
@@ -3223,6 +3228,7 @@ function submitOnboarding(e) {
   };
   onboardingData.push(record);
   filteredOnboarding = [...onboardingData];
+  saveOnboarding();
   if (typeof renderOnboarding === 'function') renderOnboarding(onboardingData);
   renderDashboard();
   const obBadge = document.getElementById('nav-badge-onboarding');
@@ -3264,6 +3270,7 @@ function submitOffboarding(e) {
   };
   offboardingData.push(record);
   filteredOffboarding = [...offboardingData];
+  saveOffboarding();
   if (typeof renderOffboarding === 'function') renderOffboarding();
   renderDashboard();
   e.target.reset();
@@ -3363,6 +3370,7 @@ function toggleOnboardingTask(recordId, itemIdx) {
   else if (record.progress >= 80) record.status = 'Near Complete';
   else if (record.progress === 0) record.status = 'New';
   else record.status = 'In Progress';
+  saveOnboarding();
   renderChecklistDetail(record);
   renderOnboarding(onboardingData);
   renderDashboard();
@@ -3417,6 +3425,7 @@ function toggleOffboardingTask(recordId, itemIdx) {
   if (done === record.tasks) record.status = 'Complete';
   else if (record.daysLeft < 0) record.status = 'Overdue';
   else record.status = 'In Progress';
+  saveOffboarding();
   openOffboardingDetail(recordId);
   renderOffboarding();
   renderDashboard();
@@ -4135,6 +4144,7 @@ function toggleChecklistItem(listType, recordId, itemIndex) {
   }
 })();
 
+loadPersistedData();
 try { renderDashboard(); } catch(e) { console.error('renderDashboard error:', e); }
 try { renderDashboardComposition(); } catch(e) { console.error('renderDashboardComposition error:', e); }
 
@@ -4408,6 +4418,36 @@ function openGroupMailto() {
 
 // Initialise counts once DOM is ready
 (function() { try { _initGroupCounts(); } catch(e) {} })();
+
+// ── localStorage Persistence ──────────────────────────────────
+
+var _LS_OB  = 'cerp_onboarding_v1';
+var _LS_OFF = 'cerp_offboarding_v1';
+
+function saveOnboarding() {
+  try { localStorage.setItem(_LS_OB,  JSON.stringify(onboardingData));  } catch(e) {}
+}
+function saveOffboarding() {
+  try { localStorage.setItem(_LS_OFF, JSON.stringify(offboardingData)); } catch(e) {}
+}
+
+function loadPersistedData() {
+  try {
+    var ob = localStorage.getItem(_LS_OB);
+    if (ob) { onboardingData = JSON.parse(ob); filteredOnboarding = [...onboardingData]; }
+  } catch(e) { localStorage.removeItem(_LS_OB); }
+  try {
+    var off = localStorage.getItem(_LS_OFF);
+    if (off) { offboardingData = JSON.parse(off); filteredOffboarding = [...offboardingData]; }
+  } catch(e) { localStorage.removeItem(_LS_OFF); }
+}
+
+function resetToDefaults() {
+  if (!confirm('Reset all onboarding and offboarding data to defaults?\n\nThis will clear any progress you have recorded.')) return;
+  localStorage.removeItem(_LS_OB);
+  localStorage.removeItem(_LS_OFF);
+  location.reload();
+}
 
 </script>
 

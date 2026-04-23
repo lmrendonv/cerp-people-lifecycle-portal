@@ -426,11 +426,13 @@
 
             <!-- Stage 2: Onboarding -->
             <div style="display:flex;flex-direction:column;align-items:center;min-width:110px;flex:1;cursor:pointer;" onclick="navigate('onboarding')">
-              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative;cursor:pointer;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
                 <svg width="16" height="16" fill="none" stroke="#3B3FA8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                <span id="lc-ob-count" style="position:absolute;top:-6px;right:-8px;background:#3B3FA8;color:#fff;border-radius:10px;min-width:20px;height:20px;padding:0 5px;font-size:0.65rem;display:flex;align-items:center;justify-content:center;font-weight:700;"></span>
               </div>
-              <div style="font-size:0.72rem;font-weight:600;color:#374151;text-align:center;cursor:pointer;">Onboarding</div>
+              <div style="display:flex;align-items:center;gap:5px;justify-content:center;">
+                <span style="font-size:0.72rem;font-weight:600;color:#374151;">Onboarding</span>
+                <span id="lc-ob-count" style="background:#3B3FA8;color:#fff;border-radius:6px;padding:1px 5px;font-size:0.62rem;font-weight:700;line-height:1.5;"></span>
+              </div>
               <div style="font-size:0.65rem;color:#9CA3AF;text-align:center;margin-top:2px;">Desk · Access · Safety</div>
             </div>
 
@@ -438,11 +440,13 @@
 
             <!-- Stage 3: Active Member -->
             <div style="display:flex;flex-direction:column;align-items:center;min-width:110px;flex:1;cursor:pointer;" onclick="navigate('members')">
-              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
                 <svg width="16" height="16" fill="none" stroke="#3B3FA8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span style="position:absolute;top:-6px;right:-8px;background:#3B3FA8;color:#fff;border-radius:10px;min-width:20px;height:20px;padding:0 5px;font-size:0.65rem;display:flex;align-items:center;justify-content:center;font-weight:700;">241</span>
               </div>
-              <div style="font-size:0.72rem;font-weight:600;color:#374151;text-align:center;">Active Member</div>
+              <div style="display:flex;align-items:center;gap:5px;justify-content:center;">
+                <span style="font-size:0.72rem;font-weight:600;color:#374151;">Active Member</span>
+                <span style="background:#3B3FA8;color:#fff;border-radius:6px;padding:1px 5px;font-size:0.62rem;font-weight:700;line-height:1.5;">241</span>
+              </div>
               <div style="font-size:0.65rem;color:#9CA3AF;text-align:center;margin-top:2px;">Research & training</div>
             </div>
 
@@ -450,11 +454,13 @@
 
             <!-- Stage 4: Exit Process -->
             <div style="display:flex;flex-direction:column;align-items:center;min-width:110px;flex:1;cursor:pointer;" onclick="navigate('offboarding')">
-              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
                 <svg width="16" height="16" fill="none" stroke="#3B3FA8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                <span id="lc-off-count" style="position:absolute;top:-6px;right:-8px;background:#3B3FA8;color:#fff;border-radius:10px;min-width:20px;height:20px;padding:0 5px;font-size:0.65rem;display:flex;align-items:center;justify-content:center;font-weight:700;"></span>
               </div>
-              <div style="font-size:0.72rem;font-weight:600;color:#374151;text-align:center;">Exit Process</div>
+              <div style="display:flex;align-items:center;gap:5px;justify-content:center;">
+                <span style="font-size:0.72rem;font-weight:600;color:#374151;">Exit Process</span>
+                <span id="lc-off-count" style="background:#3B3FA8;color:#fff;border-radius:6px;padding:1px 5px;font-size:0.62rem;font-weight:700;line-height:1.5;"></span>
+              </div>
               <div style="font-size:0.65rem;color:#9CA3AF;text-align:center;margin-top:2px;">Clearance · Handover</div>
             </div>
 
@@ -462,11 +468,13 @@
 
             <!-- Stage 5: Alumni -->
             <div style="display:flex;flex-direction:column;align-items:center;min-width:100px;flex:1;cursor:pointer;" onclick="navigate('alumni')">
-              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;position:relative;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#EEF0FB;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
                 <svg width="16" height="16" fill="none" stroke="#3B3FA8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 7v-7m0 0l6.16-3.422M12 21l-6.16-3.422"/></svg>
-                <span style="position:absolute;top:-6px;right:-8px;background:#3B3FA8;color:#fff;border-radius:10px;min-width:20px;height:20px;padding:0 5px;font-size:0.65rem;display:flex;align-items:center;justify-content:center;font-weight:700;">292</span>
               </div>
-              <div style="font-size:0.72rem;font-weight:600;color:#374151;text-align:center;">Alumni</div>
+              <div style="display:flex;align-items:center;gap:5px;justify-content:center;">
+                <span style="font-size:0.72rem;font-weight:600;color:#374151;">Alumni</span>
+                <span style="background:#3B3FA8;color:#fff;border-radius:6px;padding:1px 5px;font-size:0.62rem;font-weight:700;line-height:1.5;">292</span>
+              </div>
               <div style="font-size:0.65rem;color:#9CA3AF;text-align:center;margin-top:2px;">Contact · Position</div>
             </div>
 

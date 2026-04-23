@@ -391,7 +391,7 @@
             <div>
               <div id="dash-stat-alumni" style="font-size:1.5rem; font-weight:700; color:#111827; line-height:1;">0</div>
               <div style="font-size:0.75rem; color:#6B7280; margin-top:3px;">Alumni Records</div>
-              <div style="font-size:0.7rem; color:#6B7280; margin-top:4px; font-weight:500;">Since 2018</div>
+              <div id="dash-stat-alumni-since" style="font-size:0.7rem; color:#6B7280; margin-top:4px; font-weight:500;">Since 2011</div>
             </div>
           </div>
 
@@ -2847,6 +2847,8 @@ function renderDashboard() {
   set('dash-stat-alumni', alumniCount);
   set('dash-stat-attention', attentionCount);
   set('dash-platform-alumni', alumniCount);
+  var alumniYears = getAlumniRecords().map(function(r){ return parseInt(r.year); }).filter(function(y){ return y > 2000; });
+  if (alumniYears.length) set('dash-stat-alumni-since', 'Since ' + Math.min.apply(null, alumniYears));
   const obSub = document.getElementById('dash-ob-subtitle');
   if (obSub) obSub.textContent = `Current intake — ${onbActive} open`;
   const attSub = document.getElementById('dash-stat-attention-sub');

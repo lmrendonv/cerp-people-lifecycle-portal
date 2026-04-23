@@ -8,7 +8,6 @@
   <meta http-equiv="Expires" content="0" />
   <title>CERP Admin — Clean Energy Research Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -512,37 +511,7 @@
         </div>
 
         <!-- Analytics Charts -->
-        <div style="display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:18px;margin-bottom:22px;">
-
-          <!-- Role Distribution -->
-          <div class="card" style="padding:16px 18px;">
-            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin-bottom:12px;">Role Distribution</div>
-            <div style="position:relative;height:190px;">
-              <canvas id="chart-roles"></canvas>
-            </div>
-            <div id="chart-roles-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:4px;"></div>
-          </div>
-
-          <!-- Alumni by Year -->
-          <div class="card" style="padding:16px 18px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-              <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;">Alumni Trend by Year</div>
-              <span id="chart-alumni-total" style="font-size:0.7rem;color:#6B7280;"></span>
-            </div>
-            <div style="position:relative;height:200px;">
-              <canvas id="chart-alumni-year"></canvas>
-            </div>
-          </div>
-
-          <!-- Members by PI Group -->
-          <div class="card" style="padding:16px 18px;">
-            <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin-bottom:12px;">Members by PI Group</div>
-            <div style="position:relative;height:210px;">
-              <canvas id="chart-pi-groups"></canvas>
-            </div>
-          </div>
-
-        </div>
+        <div id="dash-analytics" style="display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:18px;margin-bottom:22px;"></div>
 
         <!-- Main 2-col layout -->
         <div style="display:grid; grid-template-columns:1fr 320px; gap:18px; align-items:start;">
@@ -4454,134 +4423,86 @@ function openGroupMailto() {
 // Initialise counts once DOM is ready
 (function() { try { _initGroupCounts(); } catch(e) {} })();
 
-// ── Dashboard Analytics Charts ───────────────────────────────
-
-var _charts = {};
+// ── Dashboard Analytics Charts (pure CSS, no external deps) ──
 
 function initCharts() {
-  if (typeof Chart === 'undefined') return;
+  var el = document.getElementById('dash-analytics');
+  if (!el) return;
 
-  var palette = ['#3B3FA8','#6366F1','#0F7A74','#10B981','#F59E0B','#EF4444','#8B5CF6','#0EA5E9','#F97316'];
+  var palette = ['#3B3FA8','#6366F1','#0F7A74','#10B981','#F59E0B','#EF4444','#8B5CF6','#0EA5E9'];
 
-  // ── Chart 1: Role Distribution (donut) ───────────────────
+  function barRow(label, value, max, color, suffix) {
+    var pct = max > 0 ? Math.round(value / max * 100) : 0;
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">'
+      + '<div style="width:110px;flex-shrink:0;font-size:0.72rem;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + label + '">' + label + '</div>'
+      + '<div style="flex:1;background:#F3F4F6;border-radius:3px;height:7px;overflow:hidden;">'
+      + '<div style="width:' + pct + '%;background:' + color + ';height:100%;border-radius:3px;transition:width 0.6s ease;"></div></div>'
+      + '<div style="width:28px;text-align:right;font-size:0.72rem;font-weight:600;color:#111827;flex-shrink:0;">' + value + (suffix||'') + '</div>'
+      + '</div>';
+  }
+
+  function card(title, total, body) {
+    return '<div class="card" style="padding:16px 18px;">'
+      + '<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;">'
+      + '<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;">' + title + '</div>'
+      + '<div style="font-size:0.7rem;color:#9CA3AF;">' + total + '</div></div>'
+      + body + '</div>';
+  }
+
+  // ── Chart 1: Role Breakdown ───────────────────────────────
   var roleCounts = {};
   membersData.forEach(function(m) {
     var t = (m.title || '').toUpperCase();
     var label = 'Other';
     if (t === 'STUDENT' || t === 'VISITING STUDENT') label = 'PhD / MS Student';
     else if (t.indexOf('POSTDOC') !== -1 || t.indexOf('POST-DOC') !== -1) label = 'Postdoctoral Fellow';
-    else if (t.indexOf('RESEARCH SCIENTIST') !== -1 || t === 'SENIOR RESEARCH SCIENTIST') label = 'Research Scientist';
+    else if (t.indexOf('RESEARCH SCIENTIST') !== -1) label = 'Research Scientist';
     else if (t === 'RESEARCHER' || t === 'VISITING RESEARCHER') label = 'Researcher';
     else if (t === 'RESEARCH SPECIALIST') label = 'Research Specialist';
     else if (t === 'RESEARCH ENGINEER') label = 'Research Engineer';
     roleCounts[label] = (roleCounts[label] || 0) + 1;
   });
-  var roleLabels = Object.keys(roleCounts).sort(function(a,b){ return roleCounts[b]-roleCounts[a]; });
-  var roleValues = roleLabels.map(function(l){ return roleCounts[l]; });
+  var rolesSorted = Object.keys(roleCounts).sort(function(a,b){ return roleCounts[b]-roleCounts[a]; });
+  var rolesMax = roleCounts[rolesSorted[0]] || 1;
+  var rolesHtml = rolesSorted.map(function(l,i){ return barRow(l, roleCounts[l], rolesMax, palette[i] || '#C7D2FE'); }).join('');
 
-  if (_charts.roles) _charts.roles.destroy();
-  var ctx1 = document.getElementById('chart-roles');
-  if (ctx1) {
-    _charts.roles = new Chart(ctx1, {
-      type: 'doughnut',
-      data: {
-        labels: roleLabels,
-        datasets: [{ data: roleValues, backgroundColor: palette, borderWidth: 2, borderColor: '#fff', hoverOffset: 6 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '68%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: function(c) { return ' ' + c.label + ': ' + c.raw; } } }
-        }
-      }
-    });
-    var legendEl = document.getElementById('chart-roles-legend');
-    if (legendEl) {
-      legendEl.innerHTML = roleLabels.map(function(l, i) {
-        return '<div style="display:flex;align-items:center;gap:6px;font-size:0.68rem;color:#374151;">'
-          + '<span style="width:10px;height:10px;border-radius:2px;background:' + palette[i] + ';flex-shrink:0;display:inline-block;"></span>'
-          + '<span style="flex:1;">' + l + '</span>'
-          + '<span style="font-weight:600;color:#111827;">' + roleCounts[l] + '</span></div>';
-      }).join('');
-    }
-  }
-
-  // ── Chart 2: Alumni by Year (bar) ────────────────────────
+  // ── Chart 2: Alumni by Year ───────────────────────────────
   var yearCounts = {};
   getAlumniRecords().forEach(function(r) {
     var y = String(r.year || '').trim();
-    if (/^\d{4}$/.test(y) && parseInt(y) >= 2010) {
-      yearCounts[y] = (yearCounts[y] || 0) + 1;
-    }
+    if (/^\d{4}$/.test(y) && parseInt(y) >= 2013) yearCounts[y] = (yearCounts[y] || 0) + 1;
   });
   var years = Object.keys(yearCounts).sort();
-  var yearValues = years.map(function(y){ return yearCounts[y]; });
+  var yearMax = Math.max.apply(null, years.map(function(y){ return yearCounts[y]; })) || 1;
+  var latestYear = years[years.length - 1];
+  var alumniHtml = '<div style="display:flex;align-items:flex-end;gap:5px;height:120px;margin-bottom:10px;">'
+    + years.map(function(y) {
+        var pct = Math.round(yearCounts[y] / yearMax * 100);
+        var isLatest = y === latestYear;
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">'
+          + '<div style="font-size:0.62rem;color:#6B7280;">' + yearCounts[y] + '</div>'
+          + '<div style="width:100%;background:' + (isLatest ? '#3B3FA8' : '#C7D2FE') + ';border-radius:3px 3px 0 0;height:' + pct + '%;min-height:3px;"></div>'
+          + '</div>';
+      }).join('')
+    + '</div>'
+    + '<div style="display:flex;gap:5px;">'
+    + years.map(function(y){ return '<div style="flex:1;text-align:center;font-size:0.6rem;color:#9CA3AF;">' + y.slice(2) + '</div>'; }).join('')
+    + '</div>';
 
-  var totalEl = document.getElementById('chart-alumni-total');
-  if (totalEl) totalEl.textContent = getAlumniRecords().length + ' total alumni';
-
-  if (_charts.alumni) _charts.alumni.destroy();
-  var ctx2 = document.getElementById('chart-alumni-year');
-  if (ctx2) {
-    _charts.alumni = new Chart(ctx2, {
-      type: 'bar',
-      data: {
-        labels: years,
-        datasets: [{
-          label: 'Alumni',
-          data: yearValues,
-          backgroundColor: years.map(function(y,i){ return i === years.length-1 ? '#3B3FA8' : '#C7D2FE'; }),
-          borderRadius: 4,
-          borderSkipped: false,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ' + c.raw + ' alumni'; } } } },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9CA3AF' } },
-          y: { grid: { color: '#F3F4F6' }, ticks: { font: { size: 10 }, color: '#9CA3AF', stepSize: 5 }, beginAtZero: true }
-        }
-      }
-    });
-  }
-
-  // ── Chart 3: Members by PI Group (horizontal bar) ────────
+  // ── Chart 3: Top PI Groups ────────────────────────────────
   var piCounts = {};
   membersData.forEach(function(m) {
-    var pi = (m.pi || 'Unknown').replace('Prof. ','').replace('Professor ','');
+    var pi = (m.pi || 'Unknown').replace(/^Prof\.?\s*/i,'');
     piCounts[pi] = (piCounts[pi] || 0) + 1;
   });
   var piSorted = Object.keys(piCounts).sort(function(a,b){ return piCounts[b]-piCounts[a]; }).slice(0,8);
-  var piValues = piSorted.map(function(p){ return piCounts[p]; });
-  var piColors = piSorted.map(function(_,i){ return i === 0 ? '#3B3FA8' : i < 3 ? '#6366F1' : '#C7D2FE'; });
+  var piMax = piCounts[piSorted[0]] || 1;
+  var piHtml = piSorted.map(function(p,i){ return barRow(p, piCounts[p], piMax, palette[i] || '#C7D2FE'); }).join('');
 
-  if (_charts.pi) _charts.pi.destroy();
-  var ctx3 = document.getElementById('chart-pi-groups');
-  if (ctx3) {
-    _charts.pi = new Chart(ctx3, {
-      type: 'bar',
-      data: {
-        labels: piSorted,
-        datasets: [{
-          data: piValues,
-          backgroundColor: piColors,
-          borderRadius: 3,
-          borderSkipped: false,
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ' + c.raw + ' members'; } } } },
-        scales: {
-          x: { grid: { color: '#F3F4F6' }, ticks: { font: { size: 10 }, color: '#9CA3AF' }, beginAtZero: true },
-          y: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#374151' } }
-        }
-      }
-    });
-  }
+  el.innerHTML =
+    card('By Role', membersData.length + ' total', rolesHtml)
+    + card('Alumni by Year', getAlumniRecords().length + ' total alumni', alumniHtml)
+    + card('By PI Group', membersData.length + ' total', piHtml);
 }
 
 // ── localStorage Persistence ──────────────────────────────────

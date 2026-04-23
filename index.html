@@ -4449,22 +4449,23 @@ function initCharts() {
       + body + '</div>';
   }
 
-  // ── Chart 1: Role Breakdown ───────────────────────────────
-  var roleCounts = {};
-  membersData.forEach(function(m) {
-    var t = (m.title || '').toUpperCase();
+  // ── Chart 1: Alumni by Type ───────────────────────────────
+  var typeCounts = {};
+  getAlumniRecords().forEach(function(r) {
+    var t = (r.type || 'Other').trim();
     var label = 'Other';
-    if (t === 'STUDENT' || t === 'VISITING STUDENT') label = 'PhD / MS Student';
-    else if (t.indexOf('POSTDOC') !== -1 || t.indexOf('POST-DOC') !== -1) label = 'Postdoctoral Fellow';
-    else if (t.indexOf('RESEARCH SCIENTIST') !== -1) label = 'Research Scientist';
-    else if (t === 'RESEARCHER' || t === 'VISITING RESEARCHER') label = 'Researcher';
-    else if (t === 'RESEARCH SPECIALIST') label = 'Research Specialist';
-    else if (t === 'RESEARCH ENGINEER') label = 'Research Engineer';
-    roleCounts[label] = (roleCounts[label] || 0) + 1;
+    if (t.indexOf('Ph.D') !== -1 || t.indexOf('PhD') !== -1) label = 'PhD Student';
+    else if (t.indexOf('Postdoc') !== -1 || t.indexOf('Post-Doc') !== -1) label = 'Postdoctoral Fellow';
+    else if (t.indexOf('MS') !== -1 || t.indexOf('Master') !== -1) label = 'MS Student';
+    else if (t.indexOf('Research Scientist') !== -1) label = 'Research Scientist';
+    else if (t.indexOf('Specialist') !== -1) label = 'Research Specialist';
+    else if (t.indexOf('Visiting') !== -1) label = 'Visiting Researcher';
+    else label = t;
+    typeCounts[label] = (typeCounts[label] || 0) + 1;
   });
-  var rolesSorted = Object.keys(roleCounts).sort(function(a,b){ return roleCounts[b]-roleCounts[a]; });
-  var rolesMax = roleCounts[rolesSorted[0]] || 1;
-  var rolesHtml = rolesSorted.map(function(l,i){ return barRow(l, roleCounts[l], rolesMax, palette[i] || '#C7D2FE'); }).join('');
+  var typesSorted = Object.keys(typeCounts).sort(function(a,b){ return typeCounts[b]-typeCounts[a]; });
+  var typesMax = typeCounts[typesSorted[0]] || 1;
+  var typesHtml = typesSorted.map(function(l,i){ return barRow(l, typeCounts[l], typesMax, palette[i] || '#C7D2FE'); }).join('');
 
   // ── Chart 2: Alumni by Year ───────────────────────────────
   var yearCounts = {};
@@ -4488,20 +4489,20 @@ function initCharts() {
       }).join('')
     + '</div>';
 
-  // ── Chart 3: Top PI Groups ────────────────────────────────
-  var piCounts = {};
-  membersData.forEach(function(m) {
-    var pi = (m.pi || 'Unknown').replace(/^Prof\.?\s*/i,'');
-    piCounts[pi] = (piCounts[pi] || 0) + 1;
+  // ── Chart 3: Alumni by Supervisor ────────────────────────
+  var supCounts = {};
+  getAlumniRecords().forEach(function(r) {
+    var s = (r.supervisor || 'Unknown').trim().replace(/^Prof\.?\s*/i,'');
+    if (s) supCounts[s] = (supCounts[s] || 0) + 1;
   });
-  var piSorted = Object.keys(piCounts).sort(function(a,b){ return piCounts[b]-piCounts[a]; }).slice(0,8);
-  var piMax = piCounts[piSorted[0]] || 1;
-  var piHtml = piSorted.map(function(p,i){ return barRow(p, piCounts[p], piMax, palette[i] || '#C7D2FE'); }).join('');
+  var supSorted = Object.keys(supCounts).sort(function(a,b){ return supCounts[b]-supCounts[a]; }).slice(0,8);
+  var supMax = supCounts[supSorted[0]] || 1;
+  var supHtml = supSorted.map(function(p,i){ return barRow(p, supCounts[p], supMax, palette[i] || '#C7D2FE'); }).join('');
 
   el.innerHTML =
-    card('By Role', membersData.length + ' total', rolesHtml)
+    card('Alumni by Type', getAlumniRecords().length + ' total', typesHtml)
     + card('Alumni by Year', getAlumniRecords().length + ' total alumni', alumniHtml)
-    + card('By PI Group', membersData.length + ' total', piHtml);
+    + card('Alumni by Supervisor', getAlumniRecords().length + ' total', supHtml);
 }
 
 // ── localStorage Persistence ──────────────────────────────────

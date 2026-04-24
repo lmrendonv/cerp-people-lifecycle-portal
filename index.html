@@ -3379,7 +3379,7 @@ function toggleOnboardingTask(recordId, itemIdx) {
   record.checklist[itemIdx].done = !record.checklist[itemIdx].done;
   var done = record.checklist.filter(function(i) { return i.done; }).length;
   record.progress = record.checklist.length ? Math.round(done / record.checklist.length * 100) : 0;
-  if (record.progress >= 100) record.status = 'Complete';
+  if (record.progress >= 100) { record.status = 'Complete'; promoteToMembers(record); }
   else if (record.progress >= 80) record.status = 'Near Complete';
   else if (record.progress === 0) record.status = 'New';
   else record.status = 'In Progress';
@@ -3435,7 +3435,7 @@ function toggleOffboardingTask(recordId, itemIdx) {
   var done = record.checklist.filter(function(i) { return i.done; }).length;
   record.done = done;
   record.tasks = record.checklist.length;
-  if (done === record.tasks) record.status = 'Complete';
+  if (done === record.tasks) { record.status = 'Complete'; promoteToAlumni(record); }
   else if (record.daysLeft < 0) record.status = 'Overdue';
   else record.status = 'In Progress';
   saveOffboarding();
@@ -4515,6 +4515,106 @@ function initCharts() {
     + card('Alumni by Supervisor', getAlumniRecords().length + ' total', supHtml);
 }
 
+// ── Lifecycle Promotions ──────────────────────────────────────
+
+var _LS_MEMBERS_EXTRA = 'cerp_members_extra_v1';
+var _LS_ALUMNI_EXTRA  = 'cerp_alumni_extra_v1';
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.textContent = '✓ ' + msg;
+  t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 22px;border-radius:8px;font-size:0.8rem;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 4px 16px rgba(0,0,0,0.18);white-space:nowrap;';
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.opacity = '1'; }, 10);
+  setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { document.body.removeChild(t); }, 300); }, 3200);
+}
+
+function saveExtraMembers() {
+  try {
+    var extras = membersData.filter(function(m) { return m._promoted; });
+    localStorage.setItem(_LS_MEMBERS_EXTRA, JSON.stringify(extras));
+  } catch(e) {}
+}
+
+function saveExtraAlumni() {
+  try {
+    var extras = peopleRegistry.filter(function(p) { return p.category === 'alumni' && p._promoted; });
+    localStorage.setItem(_LS_ALUMNI_EXTRA, JSON.stringify(extras));
+  } catch(e) {}
+}
+
+function loadExtraRecords() {
+  try {
+    var em = localStorage.getItem(_LS_MEMBERS_EXTRA);
+    if (em) {
+      JSON.parse(em).forEach(function(m) {
+        if (!membersData.some(function(x) { return x.fullName === m.fullName; })) {
+          membersData.push(m);
+        }
+      });
+      filteredMembers = [...membersData];
+    }
+  } catch(e) {}
+  try {
+    var ea = localStorage.getItem(_LS_ALUMNI_EXTRA);
+    if (ea) {
+      JSON.parse(ea).forEach(function(a) {
+        if (!peopleRegistry.some(function(x) { return x.category === 'alumni' && x.fullName === a.fullName; })) {
+          peopleRegistry.push(a);
+        }
+      });
+    }
+  } catch(e) {}
+}
+
+function promoteToMembers(obRecord) {
+  if (membersData.some(function(m) { return m.fullName === obRecord.fullName; })) return;
+  var member = {
+    id: Date.now(),
+    fullName: obRecord.fullName,
+    email: deriveKaustEmail(obRecord.fullName),
+    title: obRecord.role || 'Researcher',
+    department: obRecord.dept || '',
+    pi: (obRecord.supervisor || '').replace(/^Prof\.?\s*/i, ''),
+    initials: obRecord.initials || obRecord.fullName.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase(),
+    avatarColor: obRecord.avatarColor || '#EEF0FB',
+    avatarTextColor: obRecord.avatarTextColor || '#3B3FA8',
+    status: 'active',
+    _promoted: true
+  };
+  membersData.push(member);
+  filteredMembers = [...membersData];
+  saveExtraMembers();
+  showToast(obRecord.fullName + ' added to Current Members');
+}
+
+function promoteToAlumni(offRecord) {
+  if (peopleRegistry.some(function(p) { return p.category === 'alumni' && p.fullName === offRecord.fullName; })) return;
+  var year = offRecord.departure ? offRecord.departure.slice(0, 4) : String(new Date().getFullYear());
+  var alumni = {
+    id: Date.now(),
+    fullName: offRecord.fullName,
+    initials: offRecord.initials || offRecord.fullName.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase(),
+    avatarColor: offRecord.avatarColor || '#EEF0FB',
+    avatarTextColor: offRecord.avatarTextColor || '#3B3FA8',
+    category: 'alumni',
+    type: offRecord.role || '—',
+    dept: offRecord.dept || '',
+    supervisor: (offRecord.dept || '').replace(/\s*Group$/i, ''),
+    tenure: '— – ' + year,
+    year: year,
+    current: '—',
+    linkedin: '',
+    _promoted: true
+  };
+  peopleRegistry.push(alumni);
+  // Also remove from active members if they were promoted there
+  var mIdx = membersData.findIndex(function(m) { return m.fullName === offRecord.fullName && m._promoted; });
+  if (mIdx !== -1) { membersData.splice(mIdx, 1); filteredMembers = [...membersData]; saveExtraMembers(); }
+  saveExtraAlumni();
+  showToast(offRecord.fullName + ' added to Alumni Database');
+}
+
 // ── localStorage Persistence ──────────────────────────────────
 
 var _LS_OB  = 'cerp_onboarding_v1';
@@ -4536,12 +4636,15 @@ function loadPersistedData() {
     var off = localStorage.getItem(_LS_OFF);
     if (off) { offboardingData = JSON.parse(off); filteredOffboarding = [...offboardingData]; }
   } catch(e) { localStorage.removeItem(_LS_OFF); }
+  loadExtraRecords();
 }
 
 function resetToDefaults() {
   if (!confirm('Reset all onboarding and offboarding data to defaults?\n\nThis will clear any progress you have recorded.')) return;
   localStorage.removeItem(_LS_OB);
   localStorage.removeItem(_LS_OFF);
+  localStorage.removeItem(_LS_MEMBERS_EXTRA);
+  localStorage.removeItem(_LS_ALUMNI_EXTRA);
   location.reload();
 }
 

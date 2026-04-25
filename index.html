@@ -4272,6 +4272,44 @@ function printOffboardingReport() {
   if (win) { win.document.write(html); win.document.close(); }
 }
 
+// ── Toast notification ────────────────────────────────────────
+
+function showToast(message, type) {
+  var existing = document.getElementById('cerp-toast');
+  if (existing) existing.remove();
+  var t = document.createElement('div');
+  t.id = 'cerp-toast';
+  t.style.cssText = 'position:fixed;bottom:28px;right:28px;z-index:9999;padding:11px 20px;border-radius:8px;font-size:0.82rem;font-weight:500;color:#fff;background:' + (type === 'error' ? '#DC2626' : '#065F46') + ';box-shadow:0 4px 16px rgba(0,0,0,0.18);transition:opacity 0.3s;max-width:360px;';
+  t.textContent = message;
+  document.body.appendChild(t);
+  setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 320); }, 3500);
+}
+
+// ── API email sender (falls back to mailto: if API unavailable) ──
+
+function sendEmailViaAPI(to, subject, body) {
+  var recipients = Array.isArray(to) ? to : [to];
+  fetch('/api/send-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ to: recipients, subject: subject, body: body })
+  })
+  .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+  .then(function(res) {
+    if (res.ok && res.data.success) {
+      var label = recipients.length > 1 ? recipients.length + ' recipients' : recipients[0];
+      showToast('✓ Email sent to ' + label, 'success');
+    } else {
+      throw new Error(res.data.error || 'Send failed');
+    }
+  })
+  .catch(function() {
+    // API unavailable — fall back to mailto:
+    var mailto = 'mailto:' + recipients.join(',') + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    window.location.href = mailto;
+  });
+}
+
 // ── Email template helpers ────────────────────────────────────
 
 function deriveKaustEmail(fullName) {
@@ -4287,35 +4325,31 @@ function sendWelcomeEmail(recordId) {
   if (!r) return;
   var to = deriveKaustEmail(r.fullName);
   var pending = (r.checklist || []).filter(function(i) { return !i.done; }).map(function(i) { return '  • ' + i.task; }).join('\n');
-  var subject = encodeURIComponent('Welcome to CERP — ' + r.fullName);
-  var body = encodeURIComponent(
-    'Dear ' + r.fullName.split(' ')[0] + ',\n\n'
+  var subject = 'Welcome to CERP — ' + r.fullName;
+  var body = 'Dear ' + r.fullName.split(' ')[0] + ',\n\n'
     + 'Welcome to the Clean Energy Research Platform (CERP) at KAUST! We are delighted to have you joining us as a '
     + r.role + ' under ' + r.supervisor + '.\n\n'
     + 'Your onboarding started ' + r.startDate + ' and is currently ' + r.progress + '% complete. '
     + 'The following items are still pending:\n\n' + (pending || '  — All tasks complete') + '\n\n'
     + 'Our team will be in touch to coordinate access, safety induction, and IT setup. '
     + 'Please do not hesitate to reach out with any questions.\n\n'
-    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa'
-  );
-  window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
+    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa';
+  sendEmailViaAPI(to, subject, body);
 }
 
 function emailSupervisor(recordId) {
   var r = onboardingData.find(function(rec) { return rec.id === recordId; });
   if (!r) return;
   var pending = (r.checklist || []).filter(function(i) { return !i.done; }).map(function(i) { return '  • ' + i.task; }).join('\n');
-  var subject = encodeURIComponent('New CERP Member Onboarding — ' + r.fullName);
-  var body = encodeURIComponent(
-    'Dear ' + r.supervisor + ',\n\n'
+  var subject = 'New CERP Member Onboarding — ' + r.fullName;
+  var body = 'Dear ' + r.supervisor + ',\n\n'
     + 'This is a notification that ' + r.fullName + ' has begun onboarding as a ' + r.role
     + ' in your group (start date: ' + r.startDate + ').\n\n'
     + 'Onboarding progress: ' + r.progress + '% complete.\n\n'
     + 'Pending items:\n' + (pending || '  — All tasks complete') + '\n\n'
     + 'Kindly confirm the agreed research plan and schedule the introductory meeting at your earliest convenience.\n\n'
-    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa'
-  );
-  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa';
+  sendEmailViaAPI('', subject, body);
 }
 
 function sendOverdueReminder(recordId) {
@@ -4324,18 +4358,16 @@ function sendOverdueReminder(recordId) {
   var to = deriveKaustEmail(r.fullName);
   var daysOverdue = Math.abs(r.daysLeft);
   var pending = (r.checklist || []).filter(function(i) { return !i.done; }).map(function(i) { return '  • ' + i.task; }).join('\n');
-  var subject = encodeURIComponent('URGENT: Pending Clearance Items — ' + r.fullName + ' (' + daysOverdue + ' days overdue)');
-  var body = encodeURIComponent(
-    'Dear ' + r.fullName.split(' ')[0] + ',\n\n'
+  var subject = 'URGENT: Pending Clearance Items — ' + r.fullName + ' (' + daysOverdue + ' days overdue)';
+  var body = 'Dear ' + r.fullName.split(' ')[0] + ',\n\n'
     + 'This is an urgent reminder that your CERP departure clearance is now ' + daysOverdue + ' day' + (daysOverdue !== 1 ? 's' : '') + ' overdue.\n\n'
     + 'Your scheduled departure date was ' + r.departure + '. The following clearance items are still pending and must be completed as soon as possible:\n\n'
     + (pending || '  — All tasks complete') + '\n\n'
     + 'Please coordinate with your supervisor and the CERP Platform Administration team to resolve these items urgently. '
     + 'Failure to complete clearance may affect your final HR and IT access removal processing.\n\n'
     + 'Please contact us immediately if you require assistance.\n\n'
-    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa'
-  );
-  window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
+    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa';
+  sendEmailViaAPI(to, subject, body);
 }
 
 function sendExitNotice(recordId) {
@@ -4343,35 +4375,31 @@ function sendExitNotice(recordId) {
   if (!r) return;
   var to = deriveKaustEmail(r.fullName);
   var pending = (r.checklist || []).filter(function(i) { return !i.done; }).map(function(i) { return '  • ' + i.task; }).join('\n');
-  var subject = encodeURIComponent('CERP Departure Confirmation — ' + r.fullName);
-  var body = encodeURIComponent(
-    'Dear ' + r.fullName.split(' ')[0] + ',\n\n'
+  var subject = 'CERP Departure Confirmation — ' + r.fullName;
+  var body = 'Dear ' + r.fullName.split(' ')[0] + ',\n\n'
     + 'This email confirms that your departure from the Clean Energy Research Platform has been registered.\n\n'
     + 'Departure date: ' + r.departure + '\nReason: ' + (r.departureType || 'Not specified') + '\n\n'
     + 'The following clearance items are still pending:\n\n' + (pending || '  — All tasks complete') + '\n\n'
     + 'Please coordinate with your supervisor to complete these steps before your departure date. '
     + 'You will be added to the CERP alumni network upon completion.\n\n'
     + 'We wish you all the best in your next endeavors.\n\n'
-    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa'
-  );
-  window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
+    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa';
+  sendEmailViaAPI(to, subject, body);
 }
 
 function notifyCEC(recordId) {
   var r = offboardingData.find(function(rec) { return rec.id === recordId; });
   if (!r) return;
   var pending = (r.checklist || []).filter(function(i) { return !i.done; }).map(function(i) { return '  • ' + i.task; }).join('\n');
-  var subject = encodeURIComponent('CERP Departure Notice — ' + r.fullName + ' (' + r.departure + ')');
-  var body = encodeURIComponent(
-    'Dear CEC Team,\n\n'
+  var subject = 'CERP Departure Notice — ' + r.fullName + ' (' + r.departure + ')';
+  var body = 'Dear CEC Team,\n\n'
     + 'Please be advised that ' + r.fullName + ' (' + r.role + ', ' + r.dept
     + ') is departing CERP on ' + r.departure + '.\n\n'
     + 'Reason: ' + (r.departureType || 'Not specified') + '\n\n'
     + 'Pending clearance items:\n' + (pending || '  — All tasks complete') + '\n\n'
     + 'Kindly update relevant systems and distribution lists accordingly.\n\n'
-    + 'Best regards,\nCERP Platform Administration'
-  );
-  window.location.href = 'mailto:cerpdepartment@kaust.edu.sa?subject=' + subject + '&body=' + body;
+    + 'Best regards,\nCERP Platform Administration';
+  sendEmailViaAPI('cerpdepartment@kaust.edu.sa', subject, body);
 }
 
 // ── CSV Export ────────────────────────────────────────────────
@@ -4555,9 +4583,8 @@ function copyGroupEmails() {
 }
 
 function openGroupMailto() {
-  var subject = encodeURIComponent('CERP Platform — Message from Administration');
-  var to = _groupEmailAddresses.join(',');
-  window.location.href = 'mailto:' + to + '?subject=' + subject;
+  var subject = 'CERP Platform — Message from Administration';
+  sendEmailViaAPI(_groupEmailAddresses, subject, '');
 }
 
 // Initialise counts once DOM is ready

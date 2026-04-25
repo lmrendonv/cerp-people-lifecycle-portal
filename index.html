@@ -635,6 +635,10 @@
                 <option value="Near Complete">Near Complete</option>
                 <option value="Complete">Complete</option>
               </select>
+              <button class="btn btn-secondary" style="font-size:0.75rem;padding:5px 12px;" onclick="printOnboardingReport()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Status Report
+              </button>
               <button class="btn btn-primary" onclick="openNewOnboarding()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 New Onboarding
@@ -675,6 +679,10 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/></svg>
                 <input type="text" placeholder="Search..." class="form-input search-input" style="width:180px;padding-top:6px;padding-bottom:6px;" oninput="filterOffboarding(this.value)" />
               </div>
+              <button class="btn btn-secondary" style="font-size:0.75rem;padding:5px 12px;" onclick="printOffboardingReport()">
+                <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:5px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Status Report
+              </button>
               <button class="btn btn-primary" onclick="openNewOffboarding()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 New Case
@@ -743,6 +751,7 @@
                 <th>Department</th>
                 <th>PI Group</th>
                 <th>Email</th>
+                <th style="width:70px;"></th>
               </tr>
             </thead>
             <tbody id="members-tbody"></tbody>
@@ -2615,6 +2624,7 @@ function renderMembers(data) {
       + '<td style="color:#6B7280;">' + (m.department || '—') + '</td>'
       + '<td style="color:#6B7280;">' + (m.pi || '—') + '</td>'
       + '<td style="font-size:0.75rem;">' + (m.email ? '<a href="mailto:' + m.email + '" style="color:#3B3FA8;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">' + m.email + '</a>' : '<span style="color:#9CA3AF;">—</span>') + '</td>'
+      + '<td>' + (m.email ? '<a href="mailto:' + m.email + '?subject=' + encodeURIComponent('CERP — Message for ' + m.fullName) + '" class="btn btn-ghost" style="font-size:0.72rem;padding:3px 8px;white-space:nowrap;"><svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Email</a>' : '') + '</td>'
       + '</tr>';
   }
   tbody.innerHTML = rows;
@@ -3488,7 +3498,12 @@ function updateExitSummary(record) {
   var actionsEl = document.getElementById('exit-actions');
   if (actionsEl) {
     actionsEl.innerHTML =
-      '<button class="btn btn-secondary" style="font-size:0.75rem;padding:5px 11px;width:100%;justify-content:flex-start;" onclick="sendExitNotice(' + record.id + ')">'
+      (record.status === 'Overdue'
+        ? '<button class="btn btn-secondary" style="font-size:0.75rem;padding:5px 11px;width:100%;justify-content:flex-start;border-color:#FCA5A5;color:#DC2626;" onclick="sendOverdueReminder(' + record.id + ')">'
+          + '<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:6px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
+          + 'Send Overdue Reminder</button>'
+        : '')
+      + '<button class="btn btn-secondary" style="font-size:0.75rem;padding:5px 11px;width:100%;justify-content:flex-start;" onclick="sendExitNotice(' + record.id + ')">'
       + '<svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right:6px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>'
       + 'Send Exit Notice</button>'
       + '<button class="btn btn-secondary" style="font-size:0.75rem;padding:5px 11px;width:100%;justify-content:flex-start;" onclick="notifyCEC(' + record.id + ')">'
@@ -4167,6 +4182,96 @@ try { renderDashboard(); } catch(e) { console.error('renderDashboard error:', e)
 try { renderDashboardComposition(); } catch(e) { console.error('renderDashboardComposition error:', e); }
 try { initCharts(); } catch(e) { console.error('initCharts error:', e); }
 
+// ── Status Reports ────────────────────────────────────────────
+
+function printOnboardingReport() {
+  var data = onboardingData;
+  var date = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+  var active = data.filter(function(r){ return r.status !== 'Complete'; });
+  var complete = data.filter(function(r){ return r.status === 'Complete'; });
+
+  function statusColor(s) {
+    if (s === 'Complete') return '#065F46';
+    if (s === 'Near Complete') return '#0F7A74';
+    if (s === 'In Progress') return '#3B3FA8';
+    return '#6B7280';
+  }
+  function row(r) {
+    var pending = (r.checklist||[]).filter(function(i){return !i.done;}).length;
+    return '<tr>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;font-weight:500;">' + r.fullName + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;color:#6B7280;">' + r.role + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;color:#6B7280;">' + r.supervisor + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">' + r.startDate + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;text-align:center;">'
+        + '<div style="background:#E5E7EB;border-radius:3px;height:6px;width:80px;display:inline-block;vertical-align:middle;margin-right:6px;"><div style="background:#3B3FA8;height:100%;border-radius:3px;width:' + r.progress + '%;"></div></div>'
+        + r.progress + '%</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;color:' + statusColor(r.status) + ';font-weight:600;">' + r.status + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;text-align:center;color:#9CA3AF;">' + pending + ' pending</td>'
+      + '</tr>';
+  }
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Onboarding Status Report — ' + date + '</title>'
+    + '<style>body{font-family:system-ui,sans-serif;margin:40px;color:#111827;}h1{font-size:1.3rem;margin:0 0 4px;}table{width:100%;border-collapse:collapse;font-size:0.82rem;}th{background:#0F1A2E;color:#fff;padding:9px 10px;text-align:left;font-weight:600;font-size:0.75rem;}h2{font-size:0.85rem;text-transform:uppercase;letter-spacing:0.07em;color:#6B7280;margin:24px 0 8px;}.meta{font-size:0.82rem;color:#6B7280;margin-bottom:20px;}.summary{display:flex;gap:24px;margin-bottom:24px;}.stat{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px 20px;text-align:center;}.stat-n{font-size:1.5rem;font-weight:700;color:#111827;}.stat-l{font-size:0.72rem;color:#6B7280;margin-top:2px;}.footer{margin-top:32px;font-size:0.72rem;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:10px;}@media print{@page{margin:18mm;}button{display:none;}}</style>'
+    + '</head><body>'
+    + '<h1>Onboarding Status Report</h1>'
+    + '<div class="meta">Generated ' + date + ' · CERP People Lifecycle Portal</div>'
+    + '<div class="summary">'
+    + '<div class="stat"><div class="stat-n">' + data.length + '</div><div class="stat-l">Total Cases</div></div>'
+    + '<div class="stat"><div class="stat-n">' + active.length + '</div><div class="stat-l">Active</div></div>'
+    + '<div class="stat"><div class="stat-n">' + complete.length + '</div><div class="stat-l">Complete</div></div>'
+    + '<div class="stat"><div class="stat-n">' + data.filter(function(r){return r.status==='Near Complete';}).length + '</div><div class="stat-l">Near Complete</div></div>'
+    + '</div>'
+    + '<h2>Active Cases</h2>'
+    + '<table><thead><tr><th>Name</th><th>Role</th><th>Supervisor</th><th>Start Date</th><th>Progress</th><th>Status</th><th>Pending</th></tr></thead><tbody>'
+    + active.map(row).join('') + '</tbody></table>'
+    + (complete.length ? '<h2>Completed Cases</h2><table><thead><tr><th>Name</th><th>Role</th><th>Supervisor</th><th>Start Date</th><th>Progress</th><th>Status</th><th>Pending</th></tr></thead><tbody>' + complete.map(row).join('') + '</tbody></table>' : '')
+    + '<div class="footer">CERP People Lifecycle Portal · Clean Energy Research Platform · KAUST</div>'
+    + '<br><button onclick="window.print()" style="margin-top:8px;padding:8px 20px;background:#3B3FA8;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;">Print / Save as PDF</button>'
+    + '</body></html>';
+  var win = window.open('', '_blank', 'width=1000,height=900');
+  if (win) { win.document.write(html); win.document.close(); }
+}
+
+function printOffboardingReport() {
+  var data = offboardingData;
+  var date = new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+  var overdue = data.filter(function(r){ return r.status === 'Overdue'; });
+  var active  = data.filter(function(r){ return r.status === 'In Progress'; });
+  var complete = data.filter(function(r){ return r.status === 'Complete'; });
+
+  function row(r) {
+    var pct = r.tasks > 0 ? Math.round((r.done||0) / r.tasks * 100) : 0;
+    var dStyle = r.daysLeft < 0 ? 'color:#DC2626;font-weight:600;' : '';
+    return '<tr>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;font-weight:500;">' + r.fullName + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;color:#6B7280;">' + r.role + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;">' + r.departure + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;' + dStyle + '">' + (r.daysLeft < 0 ? Math.abs(r.daysLeft) + ' days overdue' : r.daysLeft + ' days left') + '</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;text-align:center;">' + (r.done||0) + ' / ' + (r.tasks||0) + ' (' + pct + '%)</td>'
+      + '<td style="padding:8px 10px;border-bottom:1px solid #F3F4F6;font-weight:600;color:' + (r.status==='Overdue'?'#DC2626':r.status==='Complete'?'#065F46':'#3B3FA8') + ';">' + r.status + '</td>'
+      + '</tr>';
+  }
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Offboarding Status Report — ' + date + '</title>'
+    + '<style>body{font-family:system-ui,sans-serif;margin:40px;color:#111827;}h1{font-size:1.3rem;margin:0 0 4px;}table{width:100%;border-collapse:collapse;font-size:0.82rem;}th{background:#0F1A2E;color:#fff;padding:9px 10px;text-align:left;font-weight:600;font-size:0.75rem;}h2{font-size:0.85rem;text-transform:uppercase;letter-spacing:0.07em;color:#6B7280;margin:24px 0 8px;}.meta{font-size:0.82rem;color:#6B7280;margin-bottom:20px;}.summary{display:flex;gap:24px;margin-bottom:24px;}.stat{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px 20px;text-align:center;}.stat-n{font-size:1.5rem;font-weight:700;color:#111827;}.stat-l{font-size:0.72rem;color:#6B7280;margin-top:2px;}.footer{margin-top:32px;font-size:0.72rem;color:#9CA3AF;border-top:1px solid #E5E7EB;padding-top:10px;}@media print{@page{margin:18mm;}button{display:none;}}</style>'
+    + '</head><body>'
+    + '<h1>Offboarding Status Report</h1>'
+    + '<div class="meta">Generated ' + date + ' · CERP People Lifecycle Portal</div>'
+    + '<div class="summary">'
+    + '<div class="stat"><div class="stat-n">' + data.length + '</div><div class="stat-l">Total Cases</div></div>'
+    + '<div class="stat" style="border-color:#FCA5A5;"><div class="stat-n" style="color:#DC2626;">' + overdue.length + '</div><div class="stat-l">Overdue</div></div>'
+    + '<div class="stat"><div class="stat-n">' + active.length + '</div><div class="stat-l">In Progress</div></div>'
+    + '<div class="stat"><div class="stat-n">' + complete.length + '</div><div class="stat-l">Complete</div></div>'
+    + '</div>'
+    + (overdue.length ? '<h2 style="color:#DC2626;">⚠ Overdue Cases</h2><table><thead><tr><th>Name</th><th>Role</th><th>Departure</th><th>Timeline</th><th>Tasks Done</th><th>Status</th></tr></thead><tbody>' + overdue.map(row).join('') + '</tbody></table>' : '')
+    + (active.length ? '<h2>In Progress</h2><table><thead><tr><th>Name</th><th>Role</th><th>Departure</th><th>Timeline</th><th>Tasks Done</th><th>Status</th></tr></thead><tbody>' + active.map(row).join('') + '</tbody></table>' : '')
+    + (complete.length ? '<h2>Completed</h2><table><thead><tr><th>Name</th><th>Role</th><th>Departure</th><th>Timeline</th><th>Tasks Done</th><th>Status</th></tr></thead><tbody>' + complete.map(row).join('') + '</tbody></table>' : '')
+    + '<div class="footer">CERP People Lifecycle Portal · Clean Energy Research Platform · KAUST</div>'
+    + '<br><button onclick="window.print()" style="margin-top:8px;padding:8px 20px;background:#3B3FA8;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;">Print / Save as PDF</button>'
+    + '</body></html>';
+  var win = window.open('', '_blank', 'width=1000,height=900');
+  if (win) { win.document.write(html); win.document.close(); }
+}
+
 // ── Email template helpers ────────────────────────────────────
 
 function deriveKaustEmail(fullName) {
@@ -4211,6 +4316,26 @@ function emailSupervisor(recordId) {
     + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa'
   );
   window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+}
+
+function sendOverdueReminder(recordId) {
+  var r = offboardingData.find(function(rec) { return rec.id === recordId; });
+  if (!r) return;
+  var to = deriveKaustEmail(r.fullName);
+  var daysOverdue = Math.abs(r.daysLeft);
+  var pending = (r.checklist || []).filter(function(i) { return !i.done; }).map(function(i) { return '  • ' + i.task; }).join('\n');
+  var subject = encodeURIComponent('URGENT: Pending Clearance Items — ' + r.fullName + ' (' + daysOverdue + ' days overdue)');
+  var body = encodeURIComponent(
+    'Dear ' + r.fullName.split(' ')[0] + ',\n\n'
+    + 'This is an urgent reminder that your CERP departure clearance is now ' + daysOverdue + ' day' + (daysOverdue !== 1 ? 's' : '') + ' overdue.\n\n'
+    + 'Your scheduled departure date was ' + r.departure + '. The following clearance items are still pending and must be completed as soon as possible:\n\n'
+    + (pending || '  — All tasks complete') + '\n\n'
+    + 'Please coordinate with your supervisor and the CERP Platform Administration team to resolve these items urgently. '
+    + 'Failure to complete clearance may affect your final HR and IT access removal processing.\n\n'
+    + 'Please contact us immediately if you require assistance.\n\n'
+    + 'Best regards,\nCERP Platform Administration\ncerpdepartment@kaust.edu.sa'
+  );
+  window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
 }
 
 function sendExitNotice(recordId) {

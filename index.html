@@ -2087,8 +2087,7 @@ const kaustProfileLookup = {
 };
 
 function getKaustProfileUrl(name) {
-  if (kaustProfileLookup[name]) return kaustProfileLookup[name];
-  return 'https://peoplesearch.kaust.edu.sa/home/search?q=' + encodeURIComponent(name);
+  return kaustProfileLookup[name] || null;
 }
 
 // ── Active Members (rich data model for analytics) ─────────────
@@ -2666,6 +2665,9 @@ function renderPeople() {
       const col = colors[i % colors.length];
       const ini = m.initials || (m.fullName||'?').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const profileUrl = getKaustProfileUrl(m.fullName);
+      const linkHtml = profileUrl
+        ? `<a href="${profileUrl}" target="_blank" rel="noopener noreferrer" style="font-size:0.72rem;color:#3B3FA8;font-weight:500;white-space:nowrap;text-decoration:none;">Profile ↗</a>`
+        : (m.email ? `<a href="mailto:${m.email}" style="font-size:0.72rem;color:#6B7280;font-weight:500;white-space:nowrap;text-decoration:none;">Email ↗</a>` : '');
       return `<div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
         <div class="avatar" style="background:${col};color:#fff;width:34px;height:34px;font-size:0.72rem;border-radius:8px;flex-shrink:0;">${ini}</div>
         <div style="flex:1;min-width:0;">
@@ -2674,7 +2676,7 @@ function renderPeople() {
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
           <div style="font-size:0.72rem;color:#6B7280;white-space:nowrap;">PI: ${m.pi||'—'}</div>
-          <a href="${profileUrl}" target="_blank" rel="noopener noreferrer" style="font-size:0.72rem;color:#3B3FA8;font-weight:500;white-space:nowrap;text-decoration:none;" title="KAUST People Search">KAUST ↗</a>
+          ${linkHtml}
         </div>
       </div>`;
     }).join('');
@@ -2709,9 +2711,7 @@ function renderPeople() {
               Faculty Page
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             </a>
-            <a href="${psUrl}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;font-weight:500;color:#6B7280;display:flex;align-items:center;gap:4px;text-decoration:none;" onclick="event.stopPropagation()">
-              People Search ↗
-            </a>
+            ${psUrl ? `<a href="${psUrl}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;font-weight:500;color:#6B7280;display:flex;align-items:center;gap:4px;text-decoration:none;" onclick="event.stopPropagation()">Profile ↗</a>` : ''}
             ${p.linkedin ? `<a href="${p.linkedin}" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;font-weight:500;color:#0A66C2;display:flex;align-items:center;gap:4px;text-decoration:none;" onclick="event.stopPropagation()">
               LinkedIn ↗
             </a>` : ''}
@@ -2769,7 +2769,7 @@ function renderPeople() {
         + '<div style="font-size:0.75rem;color:#6B7280;margin-top:2px;">' + (p.title||'—') + '</div>'
         + '<div style="font-size:0.7rem;color:#9CA3AF;margin-top:1px;">' + dept + '</div>'
         + (p.pi ? '<div style="font-size:0.7rem;color:#6B7280;margin-top:3px;">PI: ' + p.pi + '</div>' : '')
-        + '<a href="' + profileUrl + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px;font-size:0.72rem;color:#3B3FA8;font-weight:500;text-decoration:none;">KAUST Profile ↗</a>'
+        + (profileUrl ? '<a href="' + profileUrl + '" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:8px;font-size:0.72rem;color:#3B3FA8;font-weight:500;text-decoration:none;">KAUST Profile ↗</a>' : (p.email ? '<a href="mailto:' + p.email + '" style="display:inline-block;margin-top:8px;font-size:0.72rem;color:#6B7280;font-weight:500;text-decoration:none;">Email ↗</a>' : ''))
         + '</div>'
         + '</div>';
     }).join('');
